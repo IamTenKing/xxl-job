@@ -34,16 +34,19 @@ public class SampleXxlJob {
     /**
      * 1、简单任务示例（Bean模式）
      */
-    @XxlJob("demoJobHandler")
-    public ReturnT<String> demoJobHandler(String param) throws Exception {
-        XxlJobLogger.log("XXL-JOB, Hello World.");
+//        @XxlJob("demoJobHandler")
+//        public ReturnT<String> demoJobHandler(String param) throws Exception {
+//            System.out.println(param);
+//            System.out.println("cddcd");
+//            XxlJobLogger.log("XXL-JOB, Hello World.");
+//
+//            for (int i = 0; i < 5; i++) {
+//                XxlJobLogger.log("beat at:" + i);
+//                TimeUnit.SECONDS.sleep(2);
+//            }
 
-        for (int i = 0; i < 5; i++) {
-            XxlJobLogger.log("beat at:" + i);
-            TimeUnit.SECONDS.sleep(2);
-        }
-        return ReturnT.SUCCESS;
-    }
+//            return ReturnT.SUCCESS;
+//        }
 
 
     /**
@@ -51,7 +54,7 @@ public class SampleXxlJob {
      */
     @XxlJob("shardingJobHandler")
     public ReturnT<String> shardingJobHandler(String param) throws Exception {
-
+        System.out.println("hello");
         // 分片参数
         ShardingUtil.ShardingVO shardingVO = ShardingUtil.getShardingVo();
         XxlJobLogger.log("分片参数：当前分片序号 = {}, 总分片数 = {}", shardingVO.getIndex(), shardingVO.getTotal());
