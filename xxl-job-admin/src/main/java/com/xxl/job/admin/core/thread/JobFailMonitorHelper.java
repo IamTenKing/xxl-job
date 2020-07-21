@@ -45,20 +45,24 @@ public class JobFailMonitorHelper {
 				// monitor
 				while (!toStop) {
 					try {
-
+						//查询失败日志表
 						List<Long> failLogIds = XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().findFailJobLogIds(1000);
 						if (failLogIds!=null && !failLogIds.isEmpty()) {
 							for (long failLogId: failLogIds) {
 
 								// lock log
+								//集群模式下，通过日志表数据的行锁来避免重复执行
 								int lockRet = XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().updateAlarmStatus(failLogId, 0, -1);
+								//当前日志记录已有其他节点在处理，跳过
 								if (lockRet < 1) {
 									continue;
 								}
+								//获取失败日志及详情转换成xxljob
 								XxlJobLog log = XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().load(failLogId);
 								XxlJobInfo info = XxlJobAdminConfig.getAdminConfig().getXxlJobInfoDao().loadById(log.getJobId());
 
-								// 1、fail retry monitor
+								// 1、fail retry monitor 失败重试监控
+								//getExecutorFailRetryCount>0才会重试，每重试一次减去1
 								if (log.getExecutorFailRetryCount() > 0) {
 									JobTriggerPoolHelper.trigger(log.getJobId(), TriggerTypeEnum.RETRY, (log.getExecutorFailRetryCount()-1), log.getExecutorShardingParam(), log.getExecutorParam());
 									String retryMsg = "<br><br><span style=\"color:#F39C12;\" > >>>>>>>>>>>"+ I18nUtil.getString("jobconf_trigger_type_retry") +"<<<<<<<<<<< </span><br>";
@@ -66,7 +70,7 @@ public class JobFailMonitorHelper {
 									XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().updateTriggerInfo(log);
 								}
 
-								// 2、fail alarm monitor
+								// 2、fail alarm monitor  失败警告
 								int newAlarmStatus = 0;		// 告警状态：0-默认、-1=锁定状态、1-无需告警、2-告警成功、3-告警失败
 								if (info!=null && info.getAlarmEmail()!=null && info.getAlarmEmail().trim().length()>0) {
 									boolean alarmResult = true;
@@ -90,7 +94,7 @@ public class JobFailMonitorHelper {
 							logger.error(">>>>>>>>>>> xxl-job, job fail monitor thread error:{}", e);
 						}
 					}
-
+					//睡10s
                     try {
                         TimeUnit.SECONDS.sleep(10);
                     } catch (Exception e) {
@@ -113,8 +117,10 @@ public class JobFailMonitorHelper {
 	public void toStop(){
 		toStop = true;
 		// interrupt and wait
+		//其作用是中断此线程（此线程不一定是当前线程，而是指调用该方法的Thread实例所代表的线程），但实际上只是给线程设置一个中断标志，线程仍会继续运行。
 		monitorThread.interrupt();
 		try {
+			//主线程等待monitorThread执行完以后才会继续
 			monitorThread.join();
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage(), e);

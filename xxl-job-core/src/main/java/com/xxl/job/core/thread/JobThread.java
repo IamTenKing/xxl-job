@@ -101,6 +101,7 @@ public class JobThread extends Thread{
 		}
 
 		// execute
+		//循环检查停止标识，去队列中获取元素
 		while(!toStop){
 			running = false;
 			idleTimes++;
@@ -109,6 +110,7 @@ public class JobThread extends Thread{
             ReturnT<String> executeResult = null;
             try {
 				// to check toStop signal, we need cycle, so wo cannot use queue.take(), instand of poll(timeout)
+				//获取第一个元素，如果为空返回null
 				triggerParam = triggerQueue.poll(3L, TimeUnit.SECONDS);
 				if (triggerParam!=null) {
 					running = true;

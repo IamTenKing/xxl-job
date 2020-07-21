@@ -20,6 +20,9 @@ import java.util.Map;
 /**
  * xxl-job executor (for spring)
  *
+ * 客户端配置一个执行器
+ * 通过实现 InitializingBean, DisposableBean实现启动前，销毁前做一些事情
+ *
  * @author xuxueli 2018-11-01 09:24:52
  */
 public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationContextAware, InitializingBean, DisposableBean {
@@ -30,15 +33,19 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     public void afterPropertiesSet() throws Exception {
 
         // init JobHandler Repository
+        //扫描有jobhandler的注解的类注册到map
         initJobHandlerRepository(applicationContext);
 
         // init JobHandler Repository (for method)
+        //扫描XxlJob注解的方法注册到map
         initJobHandlerMethodRepository(applicationContext);
 
         // refresh GlueFactory
+        //SpringGlueFactory提供手动进行依赖注入的方法
         GlueFactory.refreshInstance(1);
 
         // super start
+        //启动一个nettyserver
         super.start();
     }
 
@@ -55,6 +62,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         }
 
         // init job handler action
+        //获取JobHandler注解的实现类
         Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(JobHandler.class);
 
         if (serviceBeanMap != null && serviceBeanMap.size() > 0) {
@@ -65,6 +73,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                     if (loadJobHandler(name) != null) {
                         throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
                     }
+                    //jobhandler放到map中
                     registJobHandler(name, handler);
                 }
             }
@@ -77,11 +86,15 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         }
 
         // init job handler from method
+        //获取所有的beanDefinition
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         for (String beanDefinitionName : beanDefinitionNames) {
+            //遍历所有bean
             Object bean = applicationContext.getBean(beanDefinitionName);
             Method[] methods = bean.getClass().getDeclaredMethods();
+            //遍历所有方法，判断是否有XxlJob注解
             for (Method method: methods) {
+                //得到方法上面的注解
                 XxlJob xxlJob = AnnotationUtils.findAnnotation(method, XxlJob.class);
                 if (xxlJob != null) {
 
@@ -103,6 +116,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                         throw new RuntimeException("xxl-job method-jobhandler return-classtype invalid, for[" + bean.getClass() + "#"+ method.getName() +"] , " +
                                 "The correct method format like \" public ReturnT<String> execute(String param) \" .");
                     }
+                    //暴力反射
                     method.setAccessible(true);
 
                     // init and destory
@@ -111,6 +125,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
 
                     if(xxlJob.init().trim().length() > 0) {
                         try {
+                            //通过xxljob注解配置init方法名得到init方法
                             initMethod = bean.getClass().getDeclaredMethod(xxlJob.init());
                             initMethod.setAccessible(true);
                         } catch (NoSuchMethodException e) {
@@ -127,6 +142,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                     }
 
                     // registry jobhandler
+                    //通过xxljob配置的init、destroy方法创建一个IJobHandler实现类并进行注册
                     registJobHandler(name, new MethodJobHandler(bean, method, initMethod, destroyMethod));
                 }
             }

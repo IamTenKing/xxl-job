@@ -34,19 +34,19 @@ public class SampleXxlJob {
     /**
      * 1、简单任务示例（Bean模式）
      */
-//        @XxlJob("demoJobHandler")
-//        public ReturnT<String> demoJobHandler(String param) throws Exception {
-//            System.out.println(param);
-//            System.out.println("cddcd");
-//            XxlJobLogger.log("XXL-JOB, Hello World.");
-//
-//            for (int i = 0; i < 5; i++) {
-//                XxlJobLogger.log("beat at:" + i);
-//                TimeUnit.SECONDS.sleep(2);
-//            }
+        @XxlJob("demoJobHandler")
+        public ReturnT<String> demoJobHandler(String param) throws Exception {
+            System.out.println(param);
+            System.out.println("cddcd");
+            XxlJobLogger.log("XXL-JOB, Hello World.");
 
-//            return ReturnT.SUCCESS;
-//        }
+            for (int i = 0; i < 5; i++) {
+                XxlJobLogger.log("beat at:" + i);
+                TimeUnit.SECONDS.sleep(2);
+            }
+
+            return ReturnT.SUCCESS;
+        }
 
 
     /**

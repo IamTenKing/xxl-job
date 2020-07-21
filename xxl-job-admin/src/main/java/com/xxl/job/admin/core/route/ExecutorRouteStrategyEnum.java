@@ -4,7 +4,9 @@ import com.xxl.job.admin.core.route.strategy.*;
 import com.xxl.job.admin.core.util.I18nUtil;
 
 /**
- * Created by xuxueli on 17/3/10.
+ * Created by xuxueli on 17/3/10
+ *
+ * 使用一个枚举作为策略工厂.
  */
 public enum ExecutorRouteStrategyEnum {
 
@@ -34,6 +36,8 @@ public enum ExecutorRouteStrategyEnum {
         return router;
     }
 
+
+    //提供了通过name获取对应枚举对象的方法
     public static ExecutorRouteStrategyEnum match(String name, ExecutorRouteStrategyEnum defaultItem){
         if (name != null) {
             for (ExecutorRouteStrategyEnum item: ExecutorRouteStrategyEnum.values()) {

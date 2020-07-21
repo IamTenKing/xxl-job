@@ -47,6 +47,7 @@ public class JobTriggerPoolHelper {
                 new ThreadFactory() {
                     @Override
                     public Thread newThread(Runnable r) {
+                        //为线程池的每个线程命名，方便问题排查
                         return new Thread(r, "xxl-job, admin JobTriggerPoolHelper-slowTriggerPool-" + r.hashCode());
                     }
                 });
@@ -67,6 +68,8 @@ public class JobTriggerPoolHelper {
 
 
     /**
+     *
+     * 真正调用执行任务
      * add trigger
      */
     public void addTrigger(final int jobId, final TriggerTypeEnum triggerType, final int failRetryCount, final String executorShardingParam, final String executorParam) {
@@ -79,6 +82,7 @@ public class JobTriggerPoolHelper {
         }
 
         // trigger
+        //启动线程池异步执行定时任务任务
         triggerPool_.execute(new Runnable() {
             @Override
             public void run() {
@@ -87,6 +91,7 @@ public class JobTriggerPoolHelper {
 
                 try {
                     // do trigger
+                    //执行任务，重点在里面
                     XxlJobTrigger.trigger(jobId, triggerType, failRetryCount, executorShardingParam, executorParam);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
@@ -94,6 +99,7 @@ public class JobTriggerPoolHelper {
 
                     // check timeout-count-map
                     long minTim_now = System.currentTimeMillis()/60000;
+                    //不相等说明超过了60s
                     if (minTim != minTim_now) {
                         minTim = minTim_now;
                         jobTimeoutCountMap.clear();
@@ -102,8 +108,11 @@ public class JobTriggerPoolHelper {
                     // incr timeout-count-map
                     long cost = System.currentTimeMillis()-start;
                     if (cost > 500) {       // ob-timeout threshold 500ms
+                        //执行时间超过500ms,
                         AtomicInteger timeoutCount = jobTimeoutCountMap.putIfAbsent(jobId, new AtomicInteger(1));
                         if (timeoutCount != null) {
+                            //不为空，+1，而为空，上面已经put并初始化为1了
+                            //此处对象为引用，不需要重新set进去
                             timeoutCount.incrementAndGet();
                         }
                     }

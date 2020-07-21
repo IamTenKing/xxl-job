@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 权限拦截
+ * 权限拦截器，接口调用基本上都是使用拦截器来统一拦截，再使用自定义注解进行特殊处理，限流，
+ * 所有方法统一的权限检验及判断是否有限流注解，需要进行限流
  *
  * @author xuxueli 2015-12-12 18:09:04
  */
@@ -34,6 +35,7 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
 		boolean needLogin = true;
 		boolean needAdminuser = false;
 		HandlerMethod method = (HandlerMethod)handler;
+		//判断是否有PermissionLimit注解
 		PermissionLimit permission = method.getMethodAnnotation(PermissionLimit.class);
 		if (permission!=null) {
 			needLogin = permission.limit();

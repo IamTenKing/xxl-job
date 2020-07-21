@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 
 /**
  * xxl-job config
+ * 配置类中监听InitializingBean实现调用器的启动
  *
  * @author xuxueli 2017-04-28
  */
@@ -30,14 +31,17 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     private XxlJobScheduler xxlJobScheduler;
 
+    //实现InitializingBean监听afterPropertiesSet事件
     @Override
     public void afterPropertiesSet() throws Exception {
+        //引用自己
         adminConfig = this;
 
         xxlJobScheduler = new XxlJobScheduler();
+        //启动xxjob调度器
         xxlJobScheduler.init();
     }
-
+    //实现DisposableBean监听bean destroy事件
     @Override
     public void destroy() throws Exception {
         xxlJobScheduler.destroy();

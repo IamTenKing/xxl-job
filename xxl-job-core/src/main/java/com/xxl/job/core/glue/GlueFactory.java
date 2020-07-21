@@ -50,6 +50,7 @@ public class GlueFactory {
 				Object instance = clazz.newInstance();
 				if (instance!=null) {
 					if (instance instanceof IJobHandler) {
+						//依赖注入
 						this.injectService(instance);
 						return (IJobHandler) instance;
 					} else {

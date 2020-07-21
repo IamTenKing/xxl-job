@@ -144,9 +144,10 @@ public class XxlJobExecutor  {
         serviceRegistryParam.put("address", address);
 
         xxlRpcProviderFactory = new XxlRpcProviderFactory();
-
+        //-----------传入class类，再通过class类反射创建对象
         xxlRpcProviderFactory.setServer(NettyHttpServer.class);
         xxlRpcProviderFactory.setSerializer(HessianSerializer.class);
+        //-----------传入class类，再通过class类反射创建对象
         xxlRpcProviderFactory.setCorePoolSize(20);
         xxlRpcProviderFactory.setMaxPoolSize(200);
         xxlRpcProviderFactory.setIp(ip);

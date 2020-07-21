@@ -67,8 +67,12 @@ public class JobScheduleHelper {
 
                         conn = XxlJobAdminConfig.getAdminConfig().getDataSource().getConnection();
                         connAutoCommit = conn.getAutoCommit();
+                        //手动提交事务
                         conn.setAutoCommit(false);
 
+                        //使用数据库锁来实现分布式锁
+                        //如果lock_name有索引，此处加行锁，没有索引加表锁
+                        //xxl_job_lock只有一个字段，只有一行数据，没有索引
                         preparedStatement = conn.prepareStatement(  "select * from xxl_job_lock where lock_name = 'schedule_lock' for update" );
                         preparedStatement.execute();
 
@@ -76,6 +80,7 @@ public class JobScheduleHelper {
 
                         // 1、pre read
                         long nowTime = System.currentTimeMillis();
+                        //查询出满足时间条件的任务
                         List<XxlJobInfo> scheduleList = XxlJobAdminConfig.getAdminConfig().getXxlJobInfoDao().scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
                         if (scheduleList!=null && scheduleList.size()>0) {
                             // 2、push time-ring

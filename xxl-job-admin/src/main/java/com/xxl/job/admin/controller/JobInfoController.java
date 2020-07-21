@@ -137,7 +137,6 @@ public class JobInfoController {
 		if (executorParam == null) {
 			executorParam = "";
 		}
-
 		JobTriggerPoolHelper.trigger(id, TriggerTypeEnum.MANUAL, -1, null, executorParam);
 		return ReturnT.SUCCESS;
 	}

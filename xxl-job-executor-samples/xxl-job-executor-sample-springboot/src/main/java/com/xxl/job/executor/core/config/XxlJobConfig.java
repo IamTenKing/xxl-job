@@ -38,9 +38,14 @@ public class XxlJobConfig {
     private int logRetentionDays;
 
 
+    /**
+     * 启动自动注入执行器
+     * @return
+     */
     @Bean
     public XxlJobSpringExecutor xxlJobExecutor() {
         logger.info(">>>>>>>>>>> xxl-job config init.");
+
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(adminAddresses);
         xxlJobSpringExecutor.setAppName(appName);

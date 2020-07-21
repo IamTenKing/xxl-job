@@ -57,6 +57,15 @@ public class ExecutorBizImpl implements ExecutorBiz {
         return new ReturnT<String>(ReturnT.SUCCESS_CODE, "job thread already killed.");
     }
 
+
+    /**
+     *
+     *
+     * @param logDateTim
+     * @param logId
+     * @param fromLineNum
+     * @return
+     */
     @Override
     public ReturnT<LogResult> log(long logDateTim, long logId, int fromLineNum) {
         // log filename: logPath/yyyy-MM-dd/9999.log
@@ -74,7 +83,9 @@ public class ExecutorBizImpl implements ExecutorBiz {
         String removeOldReason = null;
 
         // valid：jobHandler + jobThread
+        //jobhanler的形式
         GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerParam.getGlueType());
+        //枚举对比
         if (GlueTypeEnum.BEAN == glueTypeEnum) {
 
             // new jobhandler
@@ -167,6 +178,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
         }
 
         // push data to queue
+        //将参数添加到JobThread 内队列中
         ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
         return pushResult;
     }

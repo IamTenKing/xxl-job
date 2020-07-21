@@ -101,6 +101,7 @@ public class XxlJobTrigger {
         String shardingParam = (ExecutorRouteStrategyEnum.SHARDING_BROADCAST==executorRouteStrategyEnum)?String.valueOf(index).concat("/").concat(String.valueOf(total)):null;
 
         // 1、save log-id
+        //保存日志
         XxlJobLog jobLog = new XxlJobLog();
         jobLog.setJobGroup(jobInfo.getJobGroup());
         jobLog.setJobId(jobInfo.getId());
@@ -134,6 +135,7 @@ public class XxlJobTrigger {
                     address = group.getRegistryList().get(0);
                 }
             } else {
+                //根据配置的策略获取调用地址
                 routeAddressResult = executorRouteStrategyEnum.getRouter().route(triggerParam, group.getRegistryList());
                 if (routeAddressResult.getCode() == ReturnT.SUCCESS_CODE) {
                     address = routeAddressResult.getContent();
@@ -144,6 +146,7 @@ public class XxlJobTrigger {
         }
 
         // 4、trigger remote executor
+        //调用远程客户端执行器
         ReturnT<String> triggerResult = null;
         if (address != null) {
             triggerResult = runExecutor(triggerParam, address);
@@ -177,6 +180,7 @@ public class XxlJobTrigger {
         jobLog.setExecutorFailRetryCount(finalFailRetryCount);
         //jobLog.setTriggerTime();
         jobLog.setTriggerCode(triggerResult.getCode());
+        //保存执行结果
         jobLog.setTriggerMsg(triggerMsgSb.toString());
         XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().updateTriggerInfo(jobLog);
 
@@ -184,6 +188,7 @@ public class XxlJobTrigger {
     }
 
     /**
+     * 调用客户端执行器
      * run executor
      * @param triggerParam
      * @param address
